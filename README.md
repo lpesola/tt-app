@@ -2,15 +2,17 @@
 
 ## What
 
-Personal playground for learning/trying out new things. 
+1. A simple app showing the next means of transport aggreate from pre-defined stops 
+2. Personal playground for learning/trying out new things.
 
-A simple app showing the next means of transport aggreate from pre-defined stops. 
+
+For personal needs, a simple app with CLI would be enough, but for learning purposes I will overengineer - maybe a lot!
 
 See [roadmap](roadmap.md) for progress and plans.
 
 ## Why
 
-When you have multiple options for buses to get to place A but all of them leave from different stops, you have two options
+When multiple different buses/trains could take you where you're going but they don't leave from the same stop, you have two options
 
 * check each stop/bus individually
 * use reittiopas
