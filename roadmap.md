@@ -6,9 +6,9 @@
 
 ## App
 
-1. small shell script, query rest api to get next *n* buses/trains/whatever for stops in *list*
+1. small shell script, query rest api to get next *n* buses/trains/whatever for stops in *list*, filter by list of bus numbers
 2. simple TS app; read a file, show next *n* 
-3. simple React UI, take into account walking distance to stop, allow changing it, store settings in dynamo, add icons for train/bus, allow sorting by arrival time or walking time, android app/widget
+3. simple React UI, take into account walking distance to stop, allow changing it, store settings in dynamo, add icons for train/bus, allow sorting by arrival time or walking time, android app/widget, filter by, show only predifined list of buses
 
 ## Infra
 1. put stuff in a container, maybe a systemtcl service that runs the query every *n* (param) minutes 
