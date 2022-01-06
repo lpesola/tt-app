@@ -1,0 +1,11 @@
+Notes / progress / log of what was actually done
+
+- setup vscode etc
+- decided to first do a simple shell script with a call to the rest api but it seems like there's only a graphql api now
+- trying to figure out what stop codes visible in physical stops are called in the api 
+- graphiql is such a nice tool
+- glossary doesn't have any info on the Hxxxx stop codes, so I'll just skip that and manually figure out the first stop codes to get started
+.. or then note because I can just use that in the name field of a query, it seems to be called a code but also works in name so whatever
+- cool the api can be run locally
+- since no rest, i'll also skip the shell phase and just create a small app
+- have not touched any of this since ~nightingale, will just furiously copy-paste sensible-looking stuff and work from there with a create-react-app basis
