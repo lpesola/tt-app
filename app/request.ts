@@ -17,8 +17,9 @@ const stops: Map<string, number> = new Map([
 const stopGtfsIds: Array<string> = [];
 const routeNames = new Set(["41", "40", "37", "I", "322", "321"]);
 const apiEndpoint =
+  process.env.API_ENDPOINT ||
   "https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql";
-// todo use env or something for setting url
+console.log(apiEndpoint);
 const now: DateTime = DateTime.now();
 const nextN: Number = 5; // todo test with 0, 1
 const interval: Number = 1800; // todo now in seconds, switch to minutes
@@ -147,8 +148,8 @@ console.log(
   "Next " +
     nextN +
     " departures in " +
-    interval +
-    " seconds, starting from " +
+    interval / 60 +
+    " minutes, starting from " +
     now.toLocaleString({
       hour: "2-digit",
       minute: "2-digit",
