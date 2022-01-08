@@ -1,5 +1,9 @@
 FROM node:17-alpine
 
-COPY app /opt/
+RUN mkdir /opt/app
+COPY app/ /opt/app/
+WORKDIR /opt/app
 
-CMD [ "node /opt/app/request.js" ]
+USER node
+
+ENTRYPOINT [ "node", "/opt/app/dest/request.js"]
