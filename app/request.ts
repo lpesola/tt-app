@@ -1,24 +1,21 @@
 import { DateTime } from "luxon";
 import { gql, request } from "graphql-request";
+import { readFile } from "fs/promises";
 
 type DepartureInfo = {
-  departureTime: number;
+  vehicleDepartureTime: number;
   stop: string;
   routeName: string;
-  distance: number;
+  distanceToStop: number;
 };
 
-const stops: Map<string, number> = new Map([
-  ["H1622", 300],
-  ["H0082", 600],
-  ["H1568", 900],
-]);
-const routeNames = new Set(["41", "40", "37", "I", "322", "321"]);
-const startingFrom: DateTime = DateTime.now();
-const departuresPerRoute: number = 5; // todo test with 0, 1
-const departuresUntil: number = 1800; // todo now in seconds, switch to minutes
-const apiEndpoint: string =
-  process.env.API_ENDPOINT ||
+let stops: Map<string, number> = new Map();
+let routeNames: Set<string>;
+// todo: was there a way to set this for all instances of Datetime
+let startingFrom: DateTime = DateTime.now().setZone("Europe/Helsinki");
+let departuresPerRoute: number = 5;
+let timeRange: number = 900; // offset from now, seconds
+let apiEndpoint: string =
   "https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql";
 
 const stopGtfsIds: Array<string> = [];
@@ -35,11 +32,9 @@ async function getStopGtfsId(stopName: string): Promise<string> {
       }
     }
   `;
-
   const variables = {
     name: stopName,
   };
-
   const data = await request(apiEndpoint, query, variables);
   // forcing type like this is probably not pretty and I should write types for resutlts
   // but this will work for now just as long as the query itself is correct
@@ -56,15 +51,22 @@ async function getStopGtfsIds() {
 async function getNextDeparturesForStop(stopId: string) {
   const variables = {
     stopId: stopId,
-    timeRange: departuresUntil,
+    timeRange: timeRange,
     departures: departuresPerRoute,
+    startTime: startingFrom.toFormat("X"),
   };
   const stopQuery = gql`
-    query Stop($stopId: String!, $timeRange: Int!, $departures: Int!) {
+    query Stop(
+      $stopId: String!
+      $timeRange: Int!
+      $departures: Int!
+      $startTime: Long!
+    ) {
       stop(id: $stopId) {
         name
         code
         stoptimesForPatterns(
+          startTime: $startTime
           timeRange: $timeRange
           numberOfDepartures: $departures
         ) {
@@ -86,8 +88,12 @@ async function getNextDeparturesForStop(stopId: string) {
 }
 
 const printDepartures = (departure: DepartureInfo): void => {
-  const departureTime = DateTime.fromSeconds(departure.departureTime);
-  const walkAdjustedTime = departureTime.plus({ seconds: departure.distance });
+  const departureTime = DateTime.fromSeconds(
+    departure.vehicleDepartureTime
+  ).setZone("Europe/Helsinki");
+  const walkAdjustedTime = departureTime.minus({
+    seconds: departure.distanceToStop,
+  });
   console.log("-----------");
   console.log(
     departure.routeName +
@@ -99,10 +105,10 @@ const printDepartures = (departure: DepartureInfo): void => {
   console.log(
     "Leave at " + walkAdjustedTime.toLocaleString(DateTime.TIME_24_SIMPLE)
   );
-  console.log(departure.distance / 60 + " mins of walking to stop");
+  console.log(departure.distanceToStop / 60 + " min walk to stop");
 };
 
-async function showNext(): Promise<void> {
+let showNext = async (): Promise<void> => {
   const nextDepartures: Array<any> = [];
   for (let stop of stopGtfsIds) {
     nextDepartures.push(await getNextDeparturesForStop(stop));
@@ -113,7 +119,7 @@ async function showNext(): Promise<void> {
     const stopLongName =
       departureData.stop.name + "/" + departureData.stop.code;
     // again maybe it is not pretty to force types but I trust it's correct here now
-    const delay = stops.get(departureData.stop.code as string);
+    const walkingDistance = stops.get(departureData.stop.code as string);
     const stoptimes: Array<any> = departureData.stop.stoptimesForPatterns;
 
     for (let stoptime of stoptimes) {
@@ -123,9 +129,9 @@ async function showNext(): Promise<void> {
           const dptTime: number =
             departureTime.realtimeDeparture + departureTime.serviceDay;
           const departure: DepartureInfo = {
-            departureTime: dptTime,
+            vehicleDepartureTime: dptTime,
             stop: stopLongName,
-            distance: delay,
+            distanceToStop: walkingDistance,
             routeName: routeShortName,
           };
 
@@ -136,24 +142,72 @@ async function showNext(): Promise<void> {
   }
   // I'm sure there's a more js-y way to do this but here we are
   departures.sort(function (a, b) {
-    const walkTimeA = a.departureTime + a.distance;
-    const walkTimeB = b.departureTime + b.distance;
-    return walkTimeA - walkTimeB;
+    const dptTimeA = a.vehicleDepartureTime - a.distanceToStop;
+    const dptTimeB = b.vehicleDepartureTime - b.distanceToStop;
+    return dptTimeA - dptTimeB;
   });
 
   for (const dpt of departures) {
     printDepartures(dpt);
   }
-}
+};
 
-console.log("Using " + apiEndpoint + " as API endpoint");
+let setParameters = async () => {
+  let params: Map<string, string> = new Map();
+
+  for (const arg of process.argv.slice(2)) {
+    const nameValue = arg.split("=");
+    params.set(nameValue[0], nameValue[1]);
+  }
+
+  if (params.has("end")) {
+    timeRange = parseInt(params.get("end")) * 60;
+  }
+  if (params.has("start")) {
+    startingFrom = startingFrom.plus({
+      minutes: parseInt(params.get("start")),
+    });
+  }
+  if (params.has("endpoint")) {
+    apiEndpoint = params.get("endpoint");
+    console.log("Using " + apiEndpoint + " as API endpoint");
+  }
+  if (params.has("departures")) {
+    departuresPerRoute = parseInt(params.get("departures"));
+  }
+  if (params.has("routes")) {
+    const a = params.get("routes").split(",");
+    routeNames = new Set(a);
+  } else {
+    const result = await readFile("routes", "utf-8");
+    routeNames = new Set(result.split("\n"));
+  }
+  if (params.has("stops")) {
+    const a = params.get("stops").split(";");
+    for (const value of a) {
+      const b = value.split(",");
+      // input from user in minutes for ergonomic reasons
+      stops.set(b[0], parseInt(b[1]) * 60);
+    }
+  } else {
+    const stopsFile = await readFile("stops", "utf-8");
+    stops = new Map(
+      stopsFile.split("\n").map((value) => {
+        const splitted = value.split(",");
+        return [splitted[0], parseInt(splitted[1]) * 60];
+      })
+    );
+  }
+};
+
+await setParameters();
 
 console.log(
-  "Next " +
+  "Departures in next " +
+    timeRange / 60 +
+    " minutes, " +
     departuresPerRoute +
-    " departures in " +
-    departuresUntil / 60 +
-    " minutes, starting from " +
+    " per route, starting from " +
     startingFrom.toLocaleString({
       hour: "2-digit",
       minute: "2-digit",
