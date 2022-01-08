@@ -9,12 +9,13 @@ type DepartureInfo = {
 };
 
 const stops: Map<string, number> = new Map([
-  ["H1622", 7],
-  ["H0082", 10],
+  ["H1622", 300],
+  ["H0082", 600],
+  ["H1568", 900],
 ]);
 
 const stopGtfsIds: Array<string> = [];
-const routeNames = new Set(["41", "40", "37", "I"]);
+const routeNames = new Set(["41", "40", "37", "I", "322", "321"]);
 const apiEndpoint =
   "https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql";
 // todo use env or something for setting url
@@ -82,13 +83,19 @@ async function getNextDeparturesForStop(stopId: string) {
 
 const printDepartures = (departure: DepartureInfo): void => {
   const departureTime = DateTime.fromSeconds(departure.departureTime);
-  console.log(departure.routeName);
-  console.log(departureTime.toLocaleString(DateTime.TIME_24_SIMPLE));
-  console.log(departure.distance + " mins of walking to stop");
-  console.log(departure.stop);
+  const walkAdjustedTime = departureTime.plus({ seconds: departure.distance });
   console.log("-----------");
-
-  console.log();
+  console.log(
+    departure.routeName +
+      " departing at " +
+      departureTime.toLocaleString(DateTime.TIME_24_SIMPLE) +
+      " from " +
+      departure.stop
+  );
+  console.log(
+    "Leave at " + walkAdjustedTime.toLocaleString(DateTime.TIME_24_SIMPLE)
+  );
+  console.log(departure.distance / 60 + " mins of walking to stop");
 };
 
 async function showNext(): Promise<void> {
@@ -123,11 +130,12 @@ async function showNext(): Promise<void> {
         }
       }
     }
-    console.log("--------");
   }
   // I'm sure there's a more js-y way to do this but here we are
   departures.sort(function (a, b) {
-    return a.departureTime - b.departureTime;
+    const walkTimeA = a.departureTime + a.distance;
+    const walkTimeB = b.departureTime + b.distance;
+    return walkTimeA - walkTimeB;
   });
 
   for (const dpt of departures) {
