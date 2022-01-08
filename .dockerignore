@@ -1,0 +1,5 @@
+app/*.ts
+app/*.js.map
+app/*.txt
+app/tsconfig.json
+app/package-lock.json
