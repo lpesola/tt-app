@@ -13,16 +13,15 @@ const stops: Map<string, number> = new Map([
   ["H0082", 600],
   ["H1568", 900],
 ]);
-
-const stopGtfsIds: Array<string> = [];
 const routeNames = new Set(["41", "40", "37", "I", "322", "321"]);
+const startingFrom: DateTime = DateTime.now();
+const departuresPerRoute: number = 5; // todo test with 0, 1
+const departuresUntil: number = 1800; // todo now in seconds, switch to minutes
 const apiEndpoint =
   process.env.API_ENDPOINT ||
   "https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql";
-console.log(apiEndpoint);
-const now: DateTime = DateTime.now();
-const nextN: Number = 5; // todo test with 0, 1
-const interval: Number = 1800; // todo now in seconds, switch to minutes
+
+const stopGtfsIds: Array<string> = [];
 
 async function getStopGtfsId(stopName: string): Promise<string> {
   // If the stop name is of the format Hxxxx and an existing stop,
@@ -55,7 +54,11 @@ async function getStopGtfsIds() {
 }
 
 async function getNextDeparturesForStop(stopId: string) {
-  const variables = { stopId: stopId, timeInterval: interval, nextN: nextN };
+  const variables = {
+    stopId: stopId,
+    timeInterval: departuresUntil,
+    nextN: departuresPerRoute,
+  };
   const stopQuery = gql`
     query Stop($stopId: String!, $timeInterval: Int!, $nextN: Int!) {
       stop(id: $stopId) {
@@ -146,11 +149,11 @@ async function showNext(): Promise<void> {
 
 console.log(
   "Next " +
-    nextN +
+    departuresPerRoute +
     " departures in " +
-    interval / 60 +
+    departuresUntil / 60 +
     " minutes, starting from " +
-    now.toLocaleString({
+    startingFrom.toLocaleString({
       hour: "2-digit",
       minute: "2-digit",
       hourCycle: "h23",
