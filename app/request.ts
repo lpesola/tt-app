@@ -88,7 +88,7 @@ async function showNext(): Promise<void> {
         departureData.stop.code
     );
     console.log(
-      "Walking delay " + stops.has(departureData.stop.code as string)
+      "Walking delay " + stops.get(departureData.stop.code as string)
     );
     const stoptimes: Array<any> = departureData.stop.stoptimesForPatterns;
 
@@ -100,14 +100,10 @@ async function showNext(): Promise<void> {
           const today: DateTime = DateTime.fromSeconds(
             departureTime.serviceDay
           );
-          console.log(
-            "Service date " + today.toLocaleString(DateTime.DATETIME_FULL)
-          );
           const tmp: DateTime = today.plus({
             seconds: departureTime.realtimeDeparture,
           });
           console.log(tmp.toLocaleString(DateTime.TIME_24_SIMPLE));
-          console.log("*");
         }
       }
     }
