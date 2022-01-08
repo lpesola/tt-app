@@ -1,6 +1,9 @@
 Notes / progress / log of what was actually done
 
-- setup vscode etc
+TO 
+
+12:00 
+- setup vscode, github, planning etc
 - decided to first do a simple shell script with a call to the rest api but it seems like there's only a graphql api now
 - trying to figure out what stop codes visible in physical stops are called in the api 
 - graphiql is such a nice tool
@@ -9,3 +12,22 @@ Notes / progress / log of what was actually done
 - cool the api can be run locally
 - since no rest, i'll also skip the shell phase and just create a small app
 - have not touched any of this since ~nightingale, will just furiously copy-paste sensible-looking stuff and work from there with a create-react-app basis
+- docker service on lakannut toimimasta, debugataan sitä sitten
+- reboot...
+- graphql-request näyttää sopivan simppeliltä työkalulta ja löyty oikea kontti apin ajamiselle lokaalisti
+16:00 kauppaan
+17:00 
+- docker fixed, can run the graphql server locally now
+- small typescript piece works now for getting a stop with Hcode
+- reading docs for fuller api descriptions; what I initally thought to be very straightforward, seems to be slightly more complex and I want to understand a good way to get what I want (doesn't need to be the best way but at least somehow sensible); I had initially thought stops are the interesting thing but probably in this API trip/route is a more sensible starting point; gathering trips for certain buses/trains and picking the correct stop for them
+- now I need to refresh grahql a bit 
+- can't be bothered to fix ts errors at this point
+- parsing also still left for the simple part
+20;30
+- now just playing around with graphiql
+2224
+i probably have the query i want
+
+PE 
+8:30
+- basic stuff works but everything is ugly and types are missing, I wonder how long it will take for me to write the types, I am so very rusty
