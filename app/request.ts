@@ -1,5 +1,5 @@
-import { gql, request } from "./node_modules/graphql-request/dist/index.js";
-import { DateTime } from "./node_modules/luxon/build/node/luxon.js";
+import { DateTime } from "luxon";
+import { gql, request } from "graphql-request";
 
 type DepartureInfo = {
   departureTime: number;
@@ -17,7 +17,7 @@ const routeNames = new Set(["41", "40", "37", "I", "322", "321"]);
 const startingFrom: DateTime = DateTime.now();
 const departuresPerRoute: number = 5; // todo test with 0, 1
 const departuresUntil: number = 1800; // todo now in seconds, switch to minutes
-const apiEndpoint =
+const apiEndpoint: string =
   process.env.API_ENDPOINT ||
   "https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql";
 
@@ -56,17 +56,17 @@ async function getStopGtfsIds() {
 async function getNextDeparturesForStop(stopId: string) {
   const variables = {
     stopId: stopId,
-    timeInterval: departuresUntil,
-    nextN: departuresPerRoute,
+    timeRange: departuresUntil,
+    departures: departuresPerRoute,
   };
   const stopQuery = gql`
-    query Stop($stopId: String!, $timeInterval: Int!, $nextN: Int!) {
+    query Stop($stopId: String!, $timeRange: Int!, $departures: Int!) {
       stop(id: $stopId) {
         name
         code
         stoptimesForPatterns(
-          timeRange: $timeInterval
-          numberOfDepartures: $nextN
+          timeRange: $timeRange
+          numberOfDepartures: $departures
         ) {
           pattern {
             route {
@@ -103,7 +103,6 @@ const printDepartures = (departure: DepartureInfo): void => {
 };
 
 async function showNext(): Promise<void> {
-  await getStopGtfsIds();
   const nextDepartures: Array<any> = [];
   for (let stop of stopGtfsIds) {
     nextDepartures.push(await getNextDeparturesForStop(stop));
@@ -147,6 +146,8 @@ async function showNext(): Promise<void> {
   }
 }
 
+console.log("Using " + apiEndpoint + " as API endpoint");
+
 console.log(
   "Next " +
     departuresPerRoute +
@@ -163,4 +164,5 @@ console.log(
     })
 );
 
-showNext();
+await getStopGtfsIds();
+await showNext();
