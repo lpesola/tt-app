@@ -12,7 +12,7 @@
 
 ## Infra
 
-1. ~~put stuff in a container~~, docker compose for running locally with hsl data container
+1. ~~put stuff in a container~~, ~~docker compose for running locally with hsl data container~~
 2. ~~oidc with github~~, run app in whatever form it is, in an EC2 instance, ecr; do this with terra
 3. run front/back in ecs or eks
 
