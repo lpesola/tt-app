@@ -17,9 +17,10 @@ jobs:
           npm ci
           npm run build
       - name: eslint
-        run: npx eslint
+        run: |
+          cd app
+          npx eslint
       - name: prettier
         run: |
-          pwd
-          ls -al
+          cd app
           npx prettier --write .
