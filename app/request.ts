@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon'
-import { gql, request } from 'graphql-request'
+import { gql, request } from "graphql-request"
 import { readFile } from 'fs/promises'
 
 type DepartureInfo = {
