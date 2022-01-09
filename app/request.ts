@@ -21,13 +21,12 @@ let apiEndpoint: string =
 const stopGtfsIds: Array<string> = [];
 
 async function getStopGtfsId(stopName: string): Promise<string> {
-  // If the stop name is of the format Hxxxx and an existing stop,
-  // we only get one result
-  // In real life we'd obviously want to validate the input and the result
-  // but I'm skpping it here
+  // stations include stops that all share the same h code
+  // so this query may return more than one result
+  // setting maxResults to one is a non-functional workaround
   const query = gql`
     query StopID($name: String!) {
-      stops(name: $name) {
+      stops(name: $name, maxResults: 1) {
         gtfsId
       }
     }
