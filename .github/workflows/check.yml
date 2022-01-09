@@ -1,0 +1,22 @@
+name: Check code
+
+on:
+  push:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "17"
+      - name: ts build
+        run: |
+          cd app
+          npm ci
+          npm run build
+      - name: eslint
+        run: npx eslint
+      - name: prettier
+        run: npx prettier --write .

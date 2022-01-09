@@ -3,7 +3,6 @@ name: Build
 on:
   release:
     types: [published, released]
-
 permissions:
   id-token: write
   contents: read
