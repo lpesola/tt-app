@@ -3,8 +3,13 @@ name: Run prettier on PRs
 on:
   pull_request:
     types: [opened, edited]
+    on:
+  pull_request:
+    types: [assigned, opened, synchronize, reopened]
 
 jobs:
+    format:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
