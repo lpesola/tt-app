@@ -1,0 +1,19 @@
+version: "2.4"
+services:
+  api:
+    image: hsldevcom/opentripplanner
+    ports:
+      - "9080:8080"
+    environment:
+      - JAVA_OPTS=-Xmx5g
+      - ROUTER_NAME=hsl
+      - ROUTER_DATA_CONTAINER_URL=https://api.digitransit.fi/routing-data/v2/hsl
+  tt-react: 
+    build: tt-app/
+    ports: 
+      - "3000:3000"
+    depends_on:
+      - api
+    environment:
+      - endpoint=http://localhost:9080/otp/routers/hsl/index/graphql
+
