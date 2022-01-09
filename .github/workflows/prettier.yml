@@ -2,22 +2,21 @@ name: Run prettier on PRs
 
 on:
   pull_request:
-    types: [opened, edited]
 
 jobs:
+  format:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
           node-version: "17"
       - name: run prettier
-      - name: prettier
         run: |
           cd app
           npx prettier --write .
       - uses: stefanzweifel/git-auto-commit-action@v4.12.0
         with:
-            commit_message: Run prettier
-            file_pattern: app/.json app/*.ts
-            ref: ${{ github.head_ref }}
-
+          commit_message: Run prettier
+          file_pattern: app/*.json app/*.ts
+          add_options: "-u"

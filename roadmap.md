@@ -13,13 +13,13 @@
 ## Infra
 
 1. ~~put stuff in a container~~, docker compose for running locally with hsl data container
-2. ~~oidc with github~~, run app in whatever form it is, in an EC2 instance, limit access somehow, no need to allow connections outside; ecr; do this with terra
+2. ~~oidc with github~~, run app in whatever form it is, in an EC2 instance, ecr; do this with terra
 3. run front/back in ecs or eks
 
 ## Pipeline
 
-1. ci: basic checks; lints (tslint, shellcheck, prettier), sonarqube, token/pw scan
-2. cd: ~~build docker~~, plan from pr, merge deploys (oidc)
+1. ci: ~~basic checks; lints (tslint, shellcheck, prettier)~~, sonarqube, token/pw scan
+2. cd: ~~build docker~~, plan from pr, ~~merge deploys (oidc)~~
 
 ## Other
 
