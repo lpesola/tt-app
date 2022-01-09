@@ -20,6 +20,6 @@ jobs:
         run: npx eslint
       - name: prettier
         run: |
-        pwd
-        ls -al
-        npx prettier --write .
+          pwd
+          ls -al
+          npx prettier --write .
