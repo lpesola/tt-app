@@ -2,6 +2,7 @@ name: Check code
 
 on:
   push:
+  workflow_dispatch:
 
 jobs:
   check:
