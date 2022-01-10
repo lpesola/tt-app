@@ -21,7 +21,8 @@
 1. ci: ~~basic checks; lints (tslint, shellcheck, prettier)~~, sonarqube, token/pw scan
 2. cd: ~~build docker~~, plan from pr, ~~merge deploys (oidc)~~
 
-## Other
+## Todo
 
-- Docs: good readme, maybe even pages/wiki
-- Dev tools: local deployment, testing, https://github.com/nektos/act / compose
+- Improve instructions
+- Fix build on release
+- Investigate push from action not triggering check action
