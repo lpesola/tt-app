@@ -20,7 +20,7 @@ let apiEndpoint: string =
 
 const stopGtfsIds: Array<string> = []
 
-async function getStopGtfsId(stopName: string): Promise<string> {
+const getStopGtfsId = async (stopName: string): Promise<string> => {
     // stations include stops that all share the same h code
     // so this query may return more than one result
     // setting maxResults to one is a non-functional workaround
@@ -40,14 +40,14 @@ async function getStopGtfsId(stopName: string): Promise<string> {
     return data.stops[0].gtfsId as string
 }
 
-async function getStopGtfsIds() {
+const getStopGtfsIds = async () => {
     for (const key of stops.keys()) {
         let gtfsId = await getStopGtfsId(key)
         stopGtfsIds.push(gtfsId)
     }
 }
 
-async function getNextDeparturesForStop(stopId: string) {
+const getNextDeparturesForStop = async (stopId: string) => {
     const variables = {
         stopId: stopId,
         timeRange: timeRange,
@@ -107,7 +107,7 @@ const printDepartures = (departure: DepartureInfo): void => {
     console.log(departure.distanceToStop / 60 + ' min walk to stop')
 }
 
-let showNext = async (): Promise<void> => {
+const showNext = async (): Promise<void> => {
     const nextDepartures: Array<any> = []
     for (let stop of stopGtfsIds) {
         nextDepartures.push(await getNextDeparturesForStop(stop))
@@ -152,7 +152,7 @@ let showNext = async (): Promise<void> => {
     }
 }
 
-let setParameters = async () => {
+const setParameters = async () => {
     let params: Map<string, string> = new Map()
 
     for (const arg of process.argv.slice(2)) {
