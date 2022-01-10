@@ -54,8 +54,8 @@ const getNextDeparturesForStop = async (stopId: string) => {
         departures: departuresPerRoute,
         startTime: startingFrom.toFormat('X'),
     }
-    const stopQuery = gql`
-        query Stop(
+    const nextDepartures = gql`
+        query Departures(
             $stopId: String!
             $timeRange: Int!
             $departures: Int!
@@ -82,7 +82,7 @@ const getNextDeparturesForStop = async (stopId: string) => {
             }
         }
     `
-    const data = await request(apiEndpoint, stopQuery, variables)
+    const data = await request(apiEndpoint, nextDepartures, variables)
     return data
 }
 
@@ -107,7 +107,7 @@ const printDepartures = (departure: DepartureInfo): void => {
     console.log(departure.distanceToStop / 60 + ' min walk to stop')
 }
 
-const showNext = async (): Promise<void> => {
+const getNextDepartures = async (): Promise<Array<DepartureInfo>> => {
     const nextDepartures: Array<any> = []
     for (let stop of stopGtfsIds) {
         nextDepartures.push(await getNextDeparturesForStop(stop))
@@ -117,14 +117,17 @@ const showNext = async (): Promise<void> => {
     for (let departureData of nextDepartures) {
         const stopLongName =
             departureData.stop.name + '/' + departureData.stop.code
-        // again maybe it is not pretty to force types but I trust it's correct here now
+        // again maybe it is not pretty to force types but should be ok for now
         const walkingDistance = stops.get(departureData.stop.code as string)
-        const stoptimes: Array<any> = departureData.stop.stoptimesForPatterns
+        const patternStoptimes: Array<any> =
+            departureData.stop.stoptimesForPatterns
 
-        for (let stoptime of stoptimes) {
-            const routeShortName = stoptime.pattern.route.shortName
+        for (let patternStoptime of patternStoptimes) {
+            const routeShortName = patternStoptime.pattern.route.shortName
+            // only handle stops we are interested in
             if (routeNames.has(routeShortName)) {
-                for (let departureTime of stoptime.stoptimes) {
+                for (let departureTime of patternStoptime.stoptimes) {
+                    // departure times are given as seconds since midnight of the date at hand (service day)
                     const dptTime: number =
                         departureTime.realtimeDeparture +
                         departureTime.serviceDay
@@ -134,22 +137,12 @@ const showNext = async (): Promise<void> => {
                         distanceToStop: walkingDistance,
                         routeName: routeShortName,
                     }
-
                     departures.push(departure)
                 }
             }
         }
     }
-    // I'm sure there's a more js-y way to do this but here we are
-    departures.sort(function (a, b) {
-        const dptTimeA = a.vehicleDepartureTime - a.distanceToStop
-        const dptTimeB = b.vehicleDepartureTime - b.distanceToStop
-        return dptTimeA - dptTimeB
-    })
-
-    for (const dpt of departures) {
-        printDepartures(dpt)
-    }
+    return departures
 }
 
 const setParameters = async () => {
@@ -219,4 +212,15 @@ console.log(
 )
 
 await getStopGtfsIds()
-await showNext()
+const departures = await getNextDepartures()
+
+// I'm sure there's a more js-y way to do this but here we are
+departures.sort(function (a, b) {
+    const dptTimeA = a.vehicleDepartureTime - a.distanceToStop
+    const dptTimeB = b.vehicleDepartureTime - b.distanceToStop
+    return dptTimeA - dptTimeB
+})
+
+for (const dpt of departures) {
+    printDepartures(dpt)
+}
